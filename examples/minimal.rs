@@ -19,8 +19,8 @@ fn main() {
             color: Color::WHITE,
             brightness: 10000.0,
         })
-        .insert_resource(ClearColor(Color::hex("D4F5F5").unwrap()))
-        .insert_resource(RapierConfiguration::default())
+        .insert_resource(ClearColor(Color::linear_rgb(0.8, 0.95, 0.95)))
+        .init_resource::<RapierConfiguration>()
         .add_plugins(DefaultPlugins)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         // .add_plugins(RapierDebugRenderPlugin::default())
@@ -116,12 +116,12 @@ fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<Ass
                 color: Color::BLACK,
             },
         )
-            .with_style(Style {
-                position_type: PositionType::Absolute,
-                top: Val::Px(5.0),
-                left: Val::Px(5.0),
-                ..default()
-            }),
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(5.0),
+            left: Val::Px(5.0),
+            ..default()
+        }),
     );
 }
 

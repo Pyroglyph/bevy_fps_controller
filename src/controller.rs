@@ -3,6 +3,7 @@ use std::f32::consts::*;
 use bevy::{input::mouse::MouseMotion, math::Vec3Swizzles, prelude::*};
 use bevy_rapier3d::prelude::*;
 
+
 /// Manages the FPS controllers. Executes in `PreUpdate`, after bevy's internal
 /// input processing is finished.
 ///
@@ -289,8 +290,7 @@ pub fn fps_controller_move(
                         transform.rotation,
                         -Vec3::Y,
                         &cast_capsule,
-                        0.125,
-                        true,
+                        ShapeCastOptions::with_max_time_of_impact(0.125),
                         filter,
                     );
 
@@ -330,7 +330,7 @@ pub fn fps_controller_move(
                                 velocity.linvel = Vec3::ZERO;
                             }
                             if controller.ground_tick == 1 {
-                                velocity.linvel.y = -toi.toi;
+                                velocity.linvel.y = -toi.time_of_impact;
                             }
                         }
 
@@ -411,7 +411,7 @@ pub fn fps_controller_move(
                             filter,
                         );
                         if let Some((_, hit)) = cast {
-                            transform.translation.y += controller.step_offset * 1.0625 - hit.toi;
+                            transform.translation.y += controller.step_offset * 1.0625 - hit.time_of_impact;
                             transform.translation += cast_offset;
                         }
                     }
@@ -450,7 +450,7 @@ pub fn fps_controller_move(
     }
 }
 
-fn toi_details_unwrap(ground_cast: Option<(Entity, Toi)>) -> Option<(Toi, ToiDetails)> {
+fn toi_details_unwrap(ground_cast: Option<(Entity, ShapeCastHit)>) -> Option<(ShapeCastHit, ShapeCastHitDetails)> {
     if let Some((_, toi)) = ground_cast {
         if let Some(details) = toi.details {
             return Some((toi, details));
@@ -477,8 +477,7 @@ fn overhang_component(
         transform.rotation,
         -velocity,
         &cast_capsule,
-        0.5,
-        true,
+        ShapeCastOptions::with_max_time_of_impact(0.5),
         filter,
     );
     if let Some((_, toi_details)) = toi_details_unwrap(cast) {
@@ -493,7 +492,7 @@ fn overhang_component(
         if cast.is_none() {
             let normal = -toi_details.normal1;
             let alignment = Vec3::dot(velocity, normal);
-            return Some(alignment * normal);
+            return Some(normal * alignment);
         }
     }
     None
