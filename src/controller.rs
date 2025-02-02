@@ -380,8 +380,19 @@ pub fn fps_controller_move(
                 } else {
                     controller.uncrouch_speed
                 };
-                controller.height += dt * crouch_speed;
-                controller.height = controller.height.clamp(crouch_height, upright_height);
+
+                let old_height = controller.height;
+                let wish_height_diff = dt * crouch_speed;
+                controller.height = (controller.height + wish_height_diff)
+                    .clamp(crouch_height, upright_height);
+                let height_diff = controller.height - old_height;
+                if ground_cast.is_some() {
+                    // When on the ground, bring the top of the collider down to maintain ground contact
+                    transform.translation += Vec3::Y * height_diff / 2.;
+                } else {
+                    // When in the air, bring the bottom of the collider up to mimic Source crouch-jumping
+                    transform.translation -= Vec3::Y * height_diff / 2.;
+                }
 
                 if let Some(mut capsule) = collider.as_capsule_mut() {
                     let radius = capsule.radius();
